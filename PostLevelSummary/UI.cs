@@ -4,6 +4,8 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using PostLevelSummary.Helpers;
+using PostLevelSummary.Models;
+using WebSocketSharp;
 
 namespace PostLevelSummary
 {
@@ -24,7 +26,7 @@ namespace PostLevelSummary
             PostLevelSummary.ValueText = PostLevelSummary.TextInstance.GetComponent<TextMeshProUGUI>();
             PostLevelSummary.ValueText.font = font;
             PostLevelSummary.ValueText.color = new Vector4(0.7882f, 0.9137f, 0.902f, 1);
-            PostLevelSummary.ValueText.fontSize = 20f;
+            PostLevelSummary.ValueText.fontSize = 18f;
             PostLevelSummary.ValueText.enableWordWrapping = false;
             PostLevelSummary.ValueText.alignment = TextAlignmentOptions.BaselineRight;
             PostLevelSummary.ValueText.horizontalAlignment = HorizontalAlignmentOptions.Right;
@@ -58,12 +60,38 @@ namespace PostLevelSummary
 
             PostLevelSummary.ValueText.lineSpacing = -50f;
 
-            PostLevelSummary.ValueText.SetText($@"
-                    Extracted ${NumberFormatter.FormatToK(PostLevelSummary.Level.ExtractedValue)} out of ${NumberFormatter.FormatToK(PostLevelSummary.Level.TotalValue)}
-                    {PostLevelSummary.Level.ExtractedItems} items out of {PostLevelSummary.Level.TotalItems}
+            string playerMostLostValue = "";
+            string playerMostBrokenItems = "";
+            float mostValueLost = 0.0f;
+            int mostItemsBroken = 0;
+            foreach(PlayerBlame playerBlame in PostLevelSummary.Level.PlayerBlames)
+            {
+                if(playerBlame.ValueLost > mostValueLost)
+                {
+                    mostValueLost = playerBlame.ValueLost;
+                    playerMostLostValue = playerBlame.PlayerName;
+                }
+                if(playerBlame.ItemsBroken > mostItemsBroken)
+                {
+                    mostItemsBroken = playerBlame.ItemsBroken;
+                    playerMostBrokenItems = playerBlame.PlayerName;
+                }
+            }
 
-                    Lost ${NumberFormatter.FormatToK(PostLevelSummary.Level.TotalValueLost)} in value
-                    {PostLevelSummary.Level.ItemsBroken} {string.Format("item{0}", PostLevelSummary.Level.ItemsBroken == 1 ? "" : "s")} broken ({PostLevelSummary.Level.ItemsHit} hits)
+            PostLevelSummary.ValueText.SetText($@"
+                    Session Totals:
+                        Extracted Value ${NumberFormatter.FormatToK(PostLevelSummary.Level.SessionExtractedValue)}
+                        Lost ${NumberFormatter.FormatToK(PostLevelSummary.Level.SessionTotalValueLost)}
+                        Broken Items {PostLevelSummary.Level.SessionItemsBroken}
+
+                    Level Totals:
+                        Extracted Value ${NumberFormatter.FormatToK(PostLevelSummary.Level.ExtractedValue)} out of ${NumberFormatter.FormatToK(PostLevelSummary.Level.TotalValue)}
+                        {PostLevelSummary.Level.ExtractedItems} items out of {PostLevelSummary.Level.TotalItems}
+                        Lost ${NumberFormatter.FormatToK(PostLevelSummary.Level.TotalValueLost)}
+                        {PostLevelSummary.Level.ItemsBroken} {string.Format("item{0}", PostLevelSummary.Level.ItemsBroken == 1 ? "" : "s")} broken ({PostLevelSummary.Level.ItemsHit} hits)
+
+                    Congratulations {string.Format(playerMostBrokenItems.IsNullOrEmpty() ? "for not breaking anything!" : string.Format("to {0} for breaking the most items!", playerMostBrokenItems))}
+                    Congratulations {string.Format(playerMostLostValue.IsNullOrEmpty() ? "for not losing any value!" : string.Format("to {0} for losing the most value!", playerMostLostValue))}
                 ");
         }
     }

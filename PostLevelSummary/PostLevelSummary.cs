@@ -81,9 +81,4 @@ public class PostLevelSummary : BaseUnityPlugin
     {
         Level.Clear();
     }
-
-    public static void AddValuable(ValuableObject val)
-    {
-        Level.AddValuable(val);
-    }
 }

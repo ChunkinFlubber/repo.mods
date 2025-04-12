@@ -8,14 +8,13 @@ namespace PostLevelSummary.Patches
     [HarmonyPatch(typeof(ValuableObject))]
     class ValuableObjectPatches
     {
-        [HarmonyPatch("DollarValueSetLogic")]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(nameof(ValuableObject.DollarValueSetLogic))]
         static void DollarValueSetLogicPostfix(ValuableObject __instance)
         {
             if (__instance.name.ToLower().Contains("surplus"))
                 return;
 
-            PostLevelSummary.AddValuable(__instance);
+            PostLevelSummary.Level.TotalItems += 1;
         }
     }
 }

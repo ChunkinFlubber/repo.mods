@@ -8,13 +8,12 @@ namespace PostLevelSummary.Patches
     [HarmonyPatch(typeof(ExtractionPoint))]
     class ExtractionPointPatches
     {
-        [HarmonyPatch("StateComplete")]
-        [HarmonyPostfix]
-        public static void StateCompletePostfix()
+        [HarmonyPostfix, HarmonyPatch(nameof(ExtractionPoint.ExtractionPointSurplusRPC))]
+        public static void StateCompletePostfix(ExtractionPoint __instance)
         {
             if (PostLevelSummary.InGame)
             {
-                PostLevelSummary.Level.Extracted();
+                PostLevelSummary.Level.Extracted(__instance);
             }
         }
     }

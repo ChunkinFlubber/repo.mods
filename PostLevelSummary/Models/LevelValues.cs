@@ -10,89 +10,125 @@ namespace PostLevelSummary.Models
     public class LevelValues
     {
         public int TotalItems = 0;
-        public float TotalValue = 0f;
-        public List<ValuableObject> Valuables = new();
-        public List<ValuableValue> ValuableValues = new();
+        public float TotalValue = 0.0f;
+        public List<PlayerBlame> PlayerBlames = new();
 
         public int ItemsHit = 0;
-        public float TotalValueLost = 0f;
+        public float TotalValueLost = 0.0f;
         public int ItemsBroken = 0;
-        public float ExtractedValue = 0f;
+        public float ExtractedValue = 0.0f;
         public int ExtractedItems = 0;
 
-        public int ItemCount { get {  return Valuables.Count; } }
+        public float SessionExtractedValue = 0.0f;
+        public float SessionTotalValueLost = 0.0f;
+		public int SessionItemsBroken = 0;
 
         public void Clear()
         {
             PostLevelSummary.Logger.LogDebug("Clearing level values!");
 
             TotalItems = 0;
-            TotalValue = 0f;
-            Valuables.Clear();
-            ValuableValues.Clear();
+            TotalValue = 0.0f;
+            PlayerBlames.Clear();
 
             ItemsHit = 0;
-            TotalValueLost = 0f;
+            TotalValueLost = 0.0f;
             ItemsBroken = 0;
+            ExtractedValue = 0.0f;
+            ExtractedItems = 0;
         }
 
-        public void AddValuable(ValuableObject val)
-        {
-            TotalItems += 1;
-            TotalValue += val.dollarValueOriginal;
-            Valuables.Add(val);
-            ValuableValues.Add(new ValuableValue
+		public void CheckValueChangeFixed(ValuableObject val, float valueLost)
+		{
+			if (valueLost > 0.0f)
             {
-                InstanceId = val.GetInstanceID(),
-                Value = val.dollarValueOriginal
-            });
+				PostLevelSummary.Logger.LogDebug($"{val.name} lost {valueLost} value!");
 
-            PostLevelSummary.Logger.LogDebug($"Created Valuable Object! {val.name} Val: {val.dollarValueOriginal}");
-        }
+				ItemsHit += 1;
+				TotalValueLost += valueLost;
+                SessionTotalValueLost += valueLost;
 
-        public void CheckValueChange(ValuableObject val)
-        {
-            ValuableValue vv = ValuableValues.Find(v => v.InstanceId == val.GetInstanceID());
+				PhysGrabObject grabObject = val.GetComponent<PhysGrabObject>();
+				if (grabObject != null)
+				{
+					if (grabObject.playerGrabbing.Count > 0)
+					{
+						foreach (PhysGrabber physGrabber in grabObject.playerGrabbing)
+						{
+							PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
+							if (playerBlame == null)
+							{
+								playerBlame = new PlayerBlame() { PlayerName = physGrabber.playerAvatar.playerName };
+								PlayerBlames.Add(playerBlame);
+							}
+							playerBlame.ValueLost += valueLost;
+						}
+					}
+					else if(grabObject.lastPlayerGrabbing != null)
+					{
+						PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
+						if (playerBlame == null)
+						{
+							playerBlame = new PlayerBlame() { PlayerName = grabObject.lastPlayerGrabbing.playerName };
+							PlayerBlames.Add(playerBlame);
+						}
+						playerBlame.ValueLost += valueLost;
+					}
+				}
 
-            if (vv.Value != val.dollarValueCurrent)
-            {
-                var lostValue = vv.Value - val.dollarValueCurrent;
-                PostLevelSummary.Logger.LogDebug($"{val.name} lost {lostValue} value!");
-
-                ItemsHit = ItemsHit + 1;
-                TotalValueLost = TotalValueLost + lostValue;
-                vv.Value = val.dollarValueCurrent;
-            }
-        }
+                if (valueLost >= val.dollarValueCurrent)
+                {
+                    ItemBroken(val);
+				}
+			}
+		}
 
         public void ItemBroken(ValuableObject val)
         {
-            if (val.dollarValueCurrent != 0f) return;
+			PostLevelSummary.Logger.LogDebug($"Broken {val.name}!");
 
-            ValuableValue vv = ValuableValues.Find(v => v.InstanceId == val.GetInstanceID());
+			ItemsBroken += 1;
+            SessionItemsBroken += 1;
 
-            var lostValue = vv.Value - val.dollarValueCurrent;
-            PostLevelSummary.Logger.LogDebug($"Broken {val.name}!");
-            ItemsHit = ItemsHit + 1;
-            TotalValueLost = TotalValueLost + lostValue;
-            ItemsBroken += 1;
+			PhysGrabObject grabObject = val.GetComponent<PhysGrabObject>();
+			if (grabObject != null)
+			{
+				if (grabObject.playerGrabbing.Count > 0)
+				{
+					foreach (PhysGrabber physGrabber in grabObject.playerGrabbing)
+					{
+						PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
+						if (playerBlame == null)
+						{
+							playerBlame = new PlayerBlame() { PlayerName = physGrabber.playerAvatar.playerName };
+							PlayerBlames.Add(playerBlame);
+						}
+						playerBlame.ItemsBroken += 1;
+					}
+				}
+				else if(grabObject.lastPlayerGrabbing != null)
+				{
+					PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
+					if (playerBlame == null)
+					{
+						playerBlame = new PlayerBlame() { PlayerName = grabObject.lastPlayerGrabbing.playerName };
+						PlayerBlames.Add(playerBlame);
+					}
+                    playerBlame.ItemsBroken += 1;
+				}
+			}
+		}
 
-            ValuableValues.Remove(vv);
-        }
-
-        public void Extracted()
+        public void Extracted(ExtractionPoint extract)
         {
-            if (Valuables.Any(v => v.IsDestroyed()))
-            {
-                var existing = Valuables.FindAll(v => v.GetInstanceID() != 0).Select(v => v.GetInstanceID());
-                var extracted = ValuableValues.FindAll(v => !existing.Any(id => id == v.InstanceId));
+			PostLevelSummary.Logger.LogDebug($"Haul of {extract.haulCurrent} extracted!");
+			PostLevelSummary.Logger.LogDebug($"{extract.amountOfValuables} extracted!");
+			
+            ExtractedValue += extract.haulCurrent;
+            ExtractedItems += extract.amountOfValuables;
 
-                ExtractedValue += extracted.Select(v => v.Value).Sum();
-                ExtractedItems += extracted.Count;
-
-                Valuables.RemoveAll(v => v.GetInstanceID() == 0);
-                ValuableValues.RemoveAll(v => !existing.Any(id => id == v.InstanceId));
-            }
+            SessionExtractedValue += extract.haulCurrent;
         }
-    }
+
+	}
 }

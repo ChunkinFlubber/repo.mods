@@ -10,16 +10,14 @@ namespace PostLevelSummary.Patches
     {
         public static LevelGenerator? Instance;
 
-        [HarmonyPatch(MethodType.Constructor)]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(MethodType.Constructor)]
         public static void CaptureInstance(LevelGenerator __instance)
         {
             Instance = __instance;
             PostLevelSummary.Logger.LogDebug("Captured LevelGenerator instance.");
         }
 
-        [HarmonyPatch("StartRoomGeneration")]
-        [HarmonyPrefix]
+        [HarmonyPrefix, HarmonyPatch(nameof(LevelGenerator.StartRoomGeneration))]
         public static void StartRoomGenerationPrefix()
         {
             if (Instance == null) return;
@@ -52,12 +50,14 @@ namespace PostLevelSummary.Patches
             }
         }
 
-        [HarmonyPatch("GenerateDone")]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(nameof(LevelGenerator.GenerateDone))]
         public static void GenerateDonePostfix()
         {
-            PostLevelSummary.Logger.LogDebug("Done generating new level");
-            PostLevelSummary.Logger.LogDebug($"Total value: {PostLevelSummary.Level.TotalValue}");
+            if (!PostLevelSummary.InShop)
+            {
+                PostLevelSummary.Logger.LogDebug("Done generating new level");
+                PostLevelSummary.Logger.LogDebug($"Total value: {PostLevelSummary.Level.TotalValue}");
+            }
         }
     }
 }

@@ -11,8 +11,7 @@ namespace PostLevelSummary.Patches
     [HarmonyPatch(typeof(MenuManager))]
     class RoundDirectorPatches
     {
-        [HarmonyPatch(typeof(MenuManager), "Awake")]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(typeof(MenuManager), nameof(MenuManager.Awake))]
         public static void Awake()
         {
             if (PostLevelSummary.TextInstance == null)
