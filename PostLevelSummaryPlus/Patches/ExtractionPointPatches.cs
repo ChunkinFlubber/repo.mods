@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using HarmonyLib;
 
-namespace PostLevelSummary.Patches
+namespace PostLevelSummaryPlus.Patches
 {
     [HarmonyPatch(typeof(ExtractionPoint))]
     class ExtractionPointPatches
@@ -11,9 +11,9 @@ namespace PostLevelSummary.Patches
         [HarmonyPostfix, HarmonyPatch(nameof(ExtractionPoint.ExtractionPointSurplusRPC))]
         public static void StateCompletePostfix(ExtractionPoint __instance)
         {
-            if (PostLevelSummary.InGame)
+            if (SemiFunc.RunIsLevel() && PostLevelSummaryPlus.Instance != null)
             {
-                PostLevelSummary.Level.Extracted(__instance);
+                PostLevelSummaryPlus.Instance.Level.Extracted(__instance);
             }
         }
     }

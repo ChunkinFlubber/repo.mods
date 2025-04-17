@@ -5,18 +5,18 @@ using HarmonyLib;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace PostLevelSummary.Patches
+namespace PostLevelSummaryPlus.Patches
 {
     [HarmonyPatch(typeof(PhysGrabObjectImpactDetector))]
     class PhysGrabObjectImpactDetectorPatches
     {
         [HarmonyPostfix, HarmonyPatch(nameof(PhysGrabObjectImpactDetector.BreakRPC))]
-		static void BreakPost(PhysGrabObjectImpactDetector? __instance, float valueLost, Vector3 _contactPoint, int breakLevel, bool _loseValue)
+		private static void BreakPost(PhysGrabObjectImpactDetector? __instance, float valueLost, Vector3 _contactPoint, int breakLevel)
 		{
 			ValuableObject? vo = __instance?.GetComponent<ValuableObject>();
-			if (vo == null) return;
+			if (vo == null || PostLevelSummaryPlus.Instance == null) return;
 
-			PostLevelSummary.Level.CheckValueChangeFixed(vo, valueLost);
+			PostLevelSummaryPlus.Instance.Level.CheckValueChange(vo, valueLost);
 		}
     }
 }

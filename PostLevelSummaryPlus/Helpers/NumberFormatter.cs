@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PostLevelSummary.Helpers
+namespace PostLevelSummaryPlus.Helpers
 {
     public static class NumberFormatter
     {

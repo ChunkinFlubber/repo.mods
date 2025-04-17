@@ -4,9 +4,10 @@ using System.Text;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
-using PostLevelSummary.Helpers;
+using PostLevelSummaryPlus.Helpers;
+using UnityEngine.SceneManagement;
 
-namespace PostLevelSummary.Patches
+namespace PostLevelSummaryPlus.Patches
 {
     [HarmonyPatch(typeof(MenuManager))]
     class RoundDirectorPatches
@@ -14,11 +15,12 @@ namespace PostLevelSummary.Patches
         [HarmonyPostfix, HarmonyPatch(typeof(MenuManager), nameof(MenuManager.Awake))]
         public static void Awake()
         {
-            if (PostLevelSummary.TextInstance == null)
+            if (PostLevelSummaryPlus.Instance == null) return;
+
+            if (PostLevelSummaryPlus.Instance.TextInstance == null)
             {
                 UI.Init();
             }
-
             UI.Update();
         }
     }
