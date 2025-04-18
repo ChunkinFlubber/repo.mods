@@ -56,3 +56,5 @@ nunit-*.xml
 .vs
 bin
 Directory.Repo.Props
+.idea
+*.user
