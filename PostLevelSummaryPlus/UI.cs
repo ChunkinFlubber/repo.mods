@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using WebSocketSharp;
-using Photon.Pun;
 using PostLevelSummaryPlus.Helpers;
 using PostLevelSummaryPlus.Models;
-using SingularityGroup.HotReload;
 
 namespace PostLevelSummaryPlus
 {
@@ -70,7 +65,7 @@ namespace PostLevelSummaryPlus
             string playerMostBrokenItems = "";
             float mostValueLost = 0.0f;
             int mostItemsBroken = 0;
-            foreach (PlayerBlame playerBlame in PostLevelSummaryPlus.Instance.Level.PlayerBlames)
+            foreach (PlayerStats playerBlame in PostLevelSummaryPlus.Instance.Level.PlayerStatsList)
             {
                 if (playerBlame.ValueLost > mostValueLost)
                 {

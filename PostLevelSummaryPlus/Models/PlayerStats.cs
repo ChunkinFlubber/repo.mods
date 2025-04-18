@@ -1,9 +1,9 @@
 ﻿
 namespace PostLevelSummaryPlus.Models
 {
-	public class PlayerBlame
+	public class PlayerStats
 	{
-		public PlayerBlame(string playerName)
+		public PlayerStats(string playerName)
 		{
 			PlayerName = playerName;
 			ValueLost = 0.0f;

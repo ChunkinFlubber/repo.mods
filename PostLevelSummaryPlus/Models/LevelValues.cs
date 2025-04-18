@@ -6,7 +6,7 @@ namespace PostLevelSummaryPlus.Models
     {
         public int TotalItems = 0;
         public float TotalValue = 0.0f;
-        public readonly List<PlayerBlame> PlayerBlames = new();
+        public readonly List<PlayerStats> PlayerStatsList = new();
 
         public int ItemsHit = 0;
         public float TotalValueLost = 0.0f;
@@ -24,7 +24,7 @@ namespace PostLevelSummaryPlus.Models
 
             TotalItems = 0;
             TotalValue = 0.0f;
-            PlayerBlames.Clear();
+            PlayerStatsList.Clear();
 
             ItemsHit = 0;
             TotalValueLost = 0.0f;
@@ -48,27 +48,27 @@ namespace PostLevelSummaryPlus.Models
 			{
 				if (grabObject.playerGrabbing.Count > 0)
 				{
+					float individualValueLost = valueLost / (float)grabObject.playerGrabbing.Count;
 					foreach (PhysGrabber physGrabber in grabObject.playerGrabbing)
 					{
-						PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
-						if (playerBlame == null)
+						PlayerStats playerStats = PlayerStatsList.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
+						if (playerStats == null)
 						{
-							playerBlame = new PlayerBlame(physGrabber.playerAvatar.playerName);
-							PlayerBlames.Add(playerBlame);
+							playerStats = new PlayerStats(physGrabber.playerAvatar.playerName);
+							PlayerStatsList.Add(playerStats);
 						}
-						playerBlame.ValueLost += valueLost / (float)grabObject.playerGrabbing.Count;
+						playerStats.ValueLost += individualValueLost;
 					}
 				}
 				else if(grabObject.lastPlayerGrabbing != null)
 				{
-					PostLevelSummaryPlus.Logger.LogInfo($"{grabObject.lastPlayerGrabbing.name} grabbed for {grabObject.grabbedTimer} time!");
-					PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
-					if (playerBlame == null)
+					PlayerStats playerStats = PlayerStatsList.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
+					if (playerStats == null)
 					{
-						playerBlame = new PlayerBlame(grabObject.lastPlayerGrabbing.playerName);
-						PlayerBlames.Add(playerBlame);
+						playerStats = new PlayerStats(grabObject.lastPlayerGrabbing.playerName);
+						PlayerStatsList.Add(playerStats);
 					}
-					playerBlame.ValueLost += valueLost;
+					playerStats.ValueLost += valueLost;
 				}
 			}
 
@@ -92,24 +92,24 @@ namespace PostLevelSummaryPlus.Models
 				{
 					foreach (PhysGrabber physGrabber in grabObject.playerGrabbing)
 					{
-						PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
-						if (playerBlame == null)
+						PlayerStats playerStats = PlayerStatsList.Find(player => player.PlayerName == physGrabber.playerAvatar.playerName);
+						if (playerStats == null)
 						{
-							playerBlame = new PlayerBlame(physGrabber.playerAvatar.playerName);
-							PlayerBlames.Add(playerBlame);
+							playerStats = new PlayerStats(physGrabber.playerAvatar.playerName);
+							PlayerStatsList.Add(playerStats);
 						}
-						playerBlame.ItemsBroken += 1;
+						playerStats.ItemsBroken += 1;
 					}
 				}
 				else if(grabObject.lastPlayerGrabbing != null)
 				{
-					PlayerBlame playerBlame = PlayerBlames.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
-					if (playerBlame == null)
+					PlayerStats playerStats = PlayerStatsList.Find(player => player.PlayerName == grabObject.lastPlayerGrabbing.playerName);
+					if (playerStats == null)
 					{
-						playerBlame = new PlayerBlame(grabObject.lastPlayerGrabbing.playerName);
-						PlayerBlames.Add(playerBlame);
+						playerStats = new PlayerStats(grabObject.lastPlayerGrabbing.playerName);
+						PlayerStatsList.Add(playerStats);
 					}
-                    playerBlame.ItemsBroken += 1;
+                    playerStats.ItemsBroken += 1;
 				}
 			}
 		}

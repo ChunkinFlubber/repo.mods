@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using TMPro;
-using UnityEngine;
-using PostLevelSummaryPlus.Helpers;
-using UnityEngine.SceneManagement;
+﻿using HarmonyLib;
 
 namespace PostLevelSummaryPlus.Patches
 {

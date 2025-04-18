@@ -9,7 +9,7 @@ using PostLevelSummaryPlus.Patches;
 
 namespace PostLevelSummaryPlus;
 
-[BepInPlugin("ChunkinFlubber.PostLevelSummaryPlus", "PostLevelSummaryPlus", "1.0")]
+[BepInPlugin("ChunkinFlubber.PostLevelSummaryPlus", "PostLevelSummaryPlus", "1.1")]
 public class PostLevelSummaryPlus : BaseUnityPlugin
 {
     internal static PostLevelSummaryPlus Instance { get; private set; } = null!;
