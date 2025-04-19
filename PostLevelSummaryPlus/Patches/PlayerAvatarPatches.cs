@@ -8,14 +8,14 @@ namespace PostLevelSummaryPlus.Patches
 	{
 		private static void Postfix(PlayerAvatar __instance)
 		{
-			if (!PhotonNetwork.IsConnectedAndReady) return;
+			if (!SemiFunc.IsMasterClientOrSingleplayer() && !PhotonNetwork.IsConnectedAndReady) return;
 			
 			PostLevelSummaryPlayerAttachment plsAttachment = __instance.GetComponent<PostLevelSummaryPlayerAttachment>();
 			PhotonView playerView = __instance.GetComponent<PhotonView>();
 			if (plsAttachment == null)
 			{
-				plsAttachment = __instance.gameObject.AddComponent<PostLevelSummaryPlayerAttachment>();
-				if(playerView != null)
+				__instance.gameObject.AddComponent<PostLevelSummaryPlayerAttachment>();
+				if(playerView != null && playerView.IsMine)
 				{
 					playerView.RPC(nameof(PostLevelSummaryPlayerAttachment.RequestPostLevelSummaryRPC), RpcTarget.MasterClient);
 				}

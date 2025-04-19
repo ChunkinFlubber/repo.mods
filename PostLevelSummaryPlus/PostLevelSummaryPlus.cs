@@ -85,7 +85,7 @@ public class PostLevelSummaryPlus : BaseUnityPlugin
 
 	public static void LevelGenerationDone()
 	{
-		if (Instance == null || !PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.IsMasterClient) return;
+		if (Instance == null || !SemiFunc.IsMasterClientOrSingleplayer()) return;
 
 		Logger.LogDebug($"Done generating new level {RunManager.instance.levelCurrent.name}");
 
@@ -93,25 +93,32 @@ public class PostLevelSummaryPlus : BaseUnityPlugin
 		if (isInShop)
 		{
 			UI.Update();
+			Instance.TextInstance.SetActive(true);
 		}
 		else if(SemiFunc.RunIsLevel() || SemiFunc.RunIsArena())
 		{
 			Instance.ResetValues();
+			Instance.TextInstance.SetActive(false);
 		}
 
 		Instance.Level.TotalItems = ValuableDirector.instance.valuableList.Count;
 		ValuableDirector.instance.valuableList.ForEach(valuable => { Instance.Level.TotalValue += valuable.dollarValueCurrent; });
 		Logger.LogDebug($"Items {Instance.Level.TotalItems} with total value {Instance.Level.TotalValue}!");
 
-		if (isInShop)
+		if (Instance.MasterPhotonView != null)
 		{
-			Logger.LogDebug("Sending summary text");
-			Instance.MasterPhotonView.RPC(nameof(PostLevelSummaryPlayerAttachment.ReceivePostLevelSummaryRPC), RpcTarget.All, (object)Instance.ValueText.text);
-		}
-		else
-		{
-			Logger.LogDebug("Sending remove summary");
-			Instance.MasterPhotonView.RPC(nameof(PostLevelSummaryPlayerAttachment.RemovePostLevelSummaryRPC), RpcTarget.All);
+			if (isInShop)
+			{
+				Logger.LogDebug("Sending summary text");
+				Instance.MasterPhotonView.RPC(nameof(PostLevelSummaryPlayerAttachment.ReceivePostLevelSummaryRPC),
+					RpcTarget.Others, (object)Instance.ValueText.text);
+			}
+			else
+			{
+				Logger.LogDebug("Sending remove summary");
+				Instance.MasterPhotonView.RPC(nameof(PostLevelSummaryPlayerAttachment.RemovePostLevelSummaryRPC),
+					RpcTarget.Others);
+			}
 		}
 	}
 
